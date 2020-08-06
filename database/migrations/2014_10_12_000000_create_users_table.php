@@ -21,6 +21,10 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->foreignId('address_id');
+            $table->float('balance');
+            $table->integer('twenty_balance');
+            $table->integer('twelve_balance');
         });
     }
 
