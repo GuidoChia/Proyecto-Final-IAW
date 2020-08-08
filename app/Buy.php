@@ -28,6 +28,11 @@ class Buy extends Model {
         'date' => 'datetime',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo('App\User', 'foreign_key');
+    }
+
     public function twelveBuy() {
         return $this->hasOne('App\TwelveBuy');
     }

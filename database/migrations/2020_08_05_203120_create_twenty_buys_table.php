@@ -19,6 +19,7 @@ class CreateTwentyBuysTable extends Migration
             $table->integer('bought');
             $table->integer('returned');
             $table->integer('price');
+            $table->foreignId('buy_id');
         });
     }
 

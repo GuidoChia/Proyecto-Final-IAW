@@ -9,6 +9,15 @@ class User extends Authenticatable {
     use Notifiable;
 
     /**
+     * @var array default values for attributes
+     */
+    protected $attributes = [
+        'twelve_balance' => 0,
+        'twenty_balance' => 0,
+        'balance' => 0,
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -18,9 +27,7 @@ class User extends Authenticatable {
         'email',
         'password',
         'address_id',
-        'balance',
-        'twelve_balance',
-        'twenty_balance'
+        'buy_frequency_id',
     ];
 
     /**
@@ -47,5 +54,9 @@ class User extends Authenticatable {
 
     public function address(){
         return $this->hasOne('App\Address');
+    }
+
+    public function buyFrequency(){
+        return $this->hasOne('App\BuyFrequency');
     }
 }
