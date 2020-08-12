@@ -8,14 +8,6 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable {
     use Notifiable;
 
-    /**
-     * @var array default values for attributes
-     */
-    protected $attributes = [
-        'twelve_balance' => 0,
-        'twenty_balance' => 0,
-        'balance' => 0,
-    ];
 
     /**
      * The attributes that are mass assignable.
@@ -26,8 +18,6 @@ class User extends Authenticatable {
         'name',
         'email',
         'password',
-        'address_id',
-        'buy_frequency_id',
     ];
 
     /**
@@ -47,16 +37,4 @@ class User extends Authenticatable {
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public function buys(){
-        return $this->hasMany('App\Buy');
-    }
-
-    public function address(){
-        return $this->hasOne('App\Address');
-    }
-
-    public function buyFrequency(){
-        return $this->hasOne('App\BuyFrequency');
-    }
 }

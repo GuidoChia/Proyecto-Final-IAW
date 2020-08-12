@@ -18,6 +18,7 @@ class CreateAddressesTable extends Migration
             $table->timestamps();
             $table->float('lat');
             $table->float('lon');
+            $table->string('description');
         });
     }
 

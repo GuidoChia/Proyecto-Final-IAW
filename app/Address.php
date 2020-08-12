@@ -12,6 +12,6 @@ class Address extends Model
      * @var array
      */
     protected $fillable = [
-        'lat', 'lon'
+        'lat', 'lon', 'description'
     ];
 }

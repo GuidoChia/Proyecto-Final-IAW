@@ -12,6 +12,7 @@ class TwentyBuy extends Model {
         'buy_id'
     ];
 
+
     public function buy() {
         return $this->belongsTo('App\Buy');
     }

@@ -28,9 +28,9 @@ class Buy extends Model {
         'date' => 'datetime',
     ];
 
-    public function user()
+    public function customer()
     {
-        return $this->belongsTo('App\User', 'foreign_key');
+        return $this->belongsTo('App\Customer');
     }
 
     public function twelveBuy() {
