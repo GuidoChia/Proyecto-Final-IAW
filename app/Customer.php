@@ -38,10 +38,16 @@ class Customer extends Model
     /**
      * Returns true if it's predicted that the customer will buy something in the given date.
      * @param $predictedDate
+     * @return Boolean
      */
     public function predictBuy($predictedDate)
     {
-        $lastBuys = $this->buys()->orderBy('date', 'desc')->take(20)->get();
-        return $lastBuys->reverse();
+        $consideredBuysAmount = 20;
+        $lastBuys = $this->buys()->orderBy('date', 'desc')->take($consideredBuysAmount)->get()->reverse();
+        $firstDate = $lastBuys->first()->date; // The first buy within the last $consideredBuysAmount buys
+        $lastDate = $lastBuys->last()->date; // The last buy from the customer
+        $meanBuyDifference = date_diff($lastDate, $firstDate)->format("%a")/$consideredBuysAmount;
+        return date_diff($lastDate, $predictedDate)->format("%r%a")>$meanBuyDifference;
+
     }
 }
