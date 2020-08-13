@@ -18,6 +18,7 @@ class CreateExtraBuysTable extends Migration
             $table->timestamps();
             $table->string('description');
             $table->float('price');
+            $table->foreignId('buy_id');
         });
     }
 

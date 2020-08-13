@@ -18,7 +18,7 @@ class CreateCustomersTable extends Migration
             $table->timestamps();
             $table->string('name');
             $table->foreignId('address_id')->nullable();
-            $table->float('balance')->default(0);
+            $table->integer('balance')->default(0);
             $table->integer('twenty_balance')->default(0);
             $table->integer('twelve_balance')->default(0);
         });

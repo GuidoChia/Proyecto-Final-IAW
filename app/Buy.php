@@ -2,23 +2,11 @@
 
 namespace App;
 
+use App\Events\BuyCreated;
 use Illuminate\Database\Eloquent\Model;
 
-class Buy extends Model {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'user_id',
-        'date',
-        'paid',
-        'twelve_buy_id',
-        'twenty_buy_id',
-        'extra_buy_id'
-    ];
-
+class Buy extends Model
+{
     /**
      * The attributes that should be cast to native types.
      *
@@ -28,20 +16,32 @@ class Buy extends Model {
         'date' => 'datetime',
     ];
 
+    /**
+     * The event map for the model.
+     *
+     * @var array
+     */
+    protected $dispatchesEvents = [
+        'created' => BuyCreated::class,
+    ];
+
     public function customer()
     {
         return $this->belongsTo('App\Customer');
     }
 
-    public function twelveBuy() {
+    public function twelveBuy()
+    {
         return $this->hasOne('App\TwelveBuy');
     }
 
-    public function twentyBuy() {
+    public function twentyBuy()
+    {
         return $this->hasOne('App\TwentyBuy');
     }
 
-    public function extraBuy() {
+    public function extraBuy()
+    {
         return $this->hasOne('App\ExtraBuy');
     }
 }

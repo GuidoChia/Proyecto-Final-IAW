@@ -1,5 +1,6 @@
 <?php
 
+use App\Customer;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $customer = Customer::where('name', '=', 'Municipalidad')->first();
+    $buys = $customer->buys;
+    return view('welcome')->withBuys($buys)->withCustomer($customer);
 });
 
 Auth::routes();

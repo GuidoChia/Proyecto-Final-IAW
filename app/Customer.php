@@ -25,11 +25,23 @@ class Customer extends Model
         'address_id',
     ];
 
-    public function buys(){
+    public function buys()
+    {
         return $this->hasMany('App\Buy');
     }
 
-    public function address(){
+    public function address()
+    {
         return $this->hasOne('App\Address');
+    }
+
+    /**
+     * Returns true if it's predicted that the customer will buy something in the given date.
+     * @param $predictedDate
+     */
+    public function predictBuy($predictedDate)
+    {
+        $lastBuys = $this->buys()->orderBy('date', 'desc')->take(20)->get();
+        return $lastBuys->reverse();
     }
 }

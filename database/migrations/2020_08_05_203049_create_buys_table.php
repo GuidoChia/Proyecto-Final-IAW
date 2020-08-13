@@ -18,10 +18,7 @@ class CreateBuysTable extends Migration
             $table->timestamps();
             $table->date('date');
             $table->float('paid');
-            $table->foreignId('user_id');
-            $table->foreignId('twelve_buy_id')->nullable();
-            $table->foreignId('twenty_buy_id')->nullable();
-            $table->foreignId('extra_buy_id')->nullable();
+            $table->foreignId('customer_id');
         });
     }
 

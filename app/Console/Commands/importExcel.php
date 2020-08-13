@@ -83,7 +83,7 @@ class importExcel extends Command
 
         $customerName = basename($file, "." . strtolower($inputFileType));
         $customer = new Customer();
-        $customer->name =$customerName;
+        $customer->name = $customerName;
         $customer->save();
 
         $reader = IOFactory::createReader($inputFileType);
@@ -96,8 +96,6 @@ class importExcel extends Command
         for ($i = 3; $i < count($dataArray); $i++) {
             $dateString = $dataArray[$i][0];
             $date = $this->formatDate($dateString);
-            if ($date->format('Y')=="0017")
-                echo $dateString.PHP_EOL;
             $twentyBought = $dataArray[$i][1];
             $twelveBought = $dataArray[$i][2];
             $totalPrice = $dataArray[$i][3];
@@ -106,53 +104,41 @@ class importExcel extends Command
             $twelveReturned = $dataArray[$i][8];
             $description = $dataArray[$i][11];
             $prices = $this->getPricesFromTotal($totalPrice);
-            $twelvePrice = $prices[0];
-            $twentyPrice = $prices[1];
+            $twentyPrice = $prices[0];
+            $twelvePrice = $prices[1];
             $extraPrice = $prices[2];
-            $twentyBuy = $twelveBuy = $extraBuy = null;
+
+            $buy = new Buy();
+            $buy->customer_id = $customer->id;
+            $buy->date = $date;
+            $buy->paid = $paid;
+            $buy->save();
+
             if ($twentyBought != 0 or $twentyReturned) {
                 $twentyBuy = new TwentyBuy();
                 $twentyBuy->bought = $twentyBought;
                 $twentyBuy->returned = $twentyReturned;
                 $twentyBuy->price = $twentyPrice;
+                $twentyBuy->buy_id = $buy->id;
                 $twentyBuy->save();
+
             }
             if ($twelveBought != 0 or $twelveReturned) {
                 $twelveBuy = new TwelveBuy();
                 $twelveBuy->bought = $twelveBought;
                 $twelveBuy->returned = $twelveReturned;
                 $twelveBuy->price = $twelvePrice;
+                $twelveBuy->buy_id = $buy->id;
                 $twelveBuy->save();
             }
             if ($extraPrice != 0) {
                 $extraBuy = new ExtraBuy();
                 $extraBuy->price = $extraPrice;
                 $extraBuy->description = $description;
+                $extraBuy->buy_id = $buy->id;
                 $extraBuy->save();
-
             }
-            $twentyBuyId = $twentyBuy == null ? null : $twentyBuy->id;
-            $twelveBuyId = $twelveBuy == null ? null : $twelveBuy->id;
-            $extraBuyId = $extraBuy == null ? null : $extraBuy->id;
-
-            $buy = new Buy();
-            $buy->user_id = $customer->id;
-            $buy->date = $date;
-            $buy->paid = $paid;
-            $buy->twenty_buy_id = $twentyBuyId;
-            $buy->twelve_buy_id = $twelveBuyId;
-            $buy->extra_buy_id = $extraBuyId;
-            $buy->save();
-
-            $customer->balance = $customer->balance +
-                $twelvePrice * $twelveBought +
-                $twentyPrice * $twentyBought +
-                $extraPrice -
-                $paid;
-            $customer->save();
         }
-        $customer->save();
-
     }
 
     private function getPricesFromTotal($totalPrice)
@@ -168,10 +154,7 @@ class importExcel extends Command
 
     private function formatDate($dateString)
     {
-        $date = date_create_from_format('m/d/y', $dateString);
-        if (!$date) {
-            $date = date_create_from_format('m/d/Y', $dateString);
-        }
+        $date = date_create_from_format('d/m/Y', $dateString);
         return $date;
     }
 }
