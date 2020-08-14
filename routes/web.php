@@ -14,16 +14,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    $customer = Customer::where('name', '=', 'Municipalidad')->first();
-    $buys = $customer->buys;
-    return view('welcome')->withBuys($buys)->withCustomer($customer);
-});
+Route::get('/',
+    function () {
+        $customer = Customer::where('name', '=', 'Municipalidad')->first();
+        $isPredicted = $customer->predictBuy(now());
+        if ($isPredicted)
+            return view('welcome')->withCustomer($customer->name);
+        else
+            return view('welcome');
+    });
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
