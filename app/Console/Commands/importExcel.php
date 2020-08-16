@@ -65,12 +65,22 @@ class importExcel extends Command
      */
     public function handle()
     {
-        $folderPath = public_path('excel');
-        $folderContent = scandir($folderPath);
-        foreach ($folderContent as $file) {
-            $extension = pathinfo($file)['extension'];
-            if ($extension == 'xls' or $extension == 'xlsx') {
-                importExcel::importFile($folderPath . "\\" . $file);
+        $rootFolderPath = public_path('excel');
+        $folders = scandir($rootFolderPath);
+        foreach ($folders as $folder) {
+            echo $rootFolderPath . "\\" . $folder . PHP_EOL;
+            if ($folder != '.' && $folder != '..') {
+                if (is_dir($rootFolderPath . "\\" . $folder)) {
+                    $files = scandir($rootFolderPath . "\\" . $folder);
+                    foreach ($files as $file) {
+
+                        $extension = pathinfo($file)['extension'];
+                        if ($extension == 'xls' or $extension == 'xlsx') {
+                            echo $file.PHP_EOL;
+                            importExcel::importFile($rootFolderPath . "\\" . $folder . "\\" . $file);
+                        }
+                    }
+                }
             }
         }
 
@@ -90,12 +100,16 @@ class importExcel extends Command
         $spreadsheet = $reader->load($file);
         $firstSheet = $spreadsheet->getSheet($spreadsheet->getFirstSheetIndex());
         $dataArray = $firstSheet->toArray(
-            0, false, true, false
+            0, false, false, false
         );
 
         for ($i = 3; $i < count($dataArray); $i++) {
-            $dateString = $dataArray[$i][0];
-            $date = $this->formatDate($dateString);
+            $dateValue = $dataArray[$i][0];
+            if ($dateValue == 0) break;
+            $date = $this->formatDate($dateValue);
+            if ($date<date_create_from_format('d/m/Y', '01/01/2015'))
+                $date=date_create_from_format('d/m/Y', '01/01/2015');
+
             $twentyBought = $dataArray[$i][1];
             $twelveBought = $dataArray[$i][2];
             $totalPrice = $dataArray[$i][3];
@@ -139,6 +153,7 @@ class importExcel extends Command
                 $extraBuy->save();
             }
         }
+
     }
 
     private function getPricesFromTotal($totalPrice)
@@ -152,9 +167,15 @@ class importExcel extends Command
         }
     }
 
-    private function formatDate($dateString)
+    private function formatDate($dateValue)
     {
-        $date = date_create_from_format('d/m/Y', $dateString);
+        $date = null;
+        if (is_int($dateValue)) {
+            $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateValue);
+        } else if (is_string($dateValue)) {
+            $date = date_create_from_format('d/m/Y', trim($dateValue));
+
+        }
         return $date;
     }
 }

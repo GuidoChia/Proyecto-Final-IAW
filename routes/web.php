@@ -1,6 +1,5 @@
 <?php
 
-use App\Customer;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,15 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/',
     function () {
-        $customer = Customer::where('name', '=', 'Municipalidad')->first();
-        $isPredicted = $customer->predictBuy(now());
-        if ($isPredicted)
-            return view('welcome')->withCustomer($customer->name);
-        else
-            return view('welcome');
+        return view('welcome');
     });
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/prediction', 'RoutePredictionController@index')->name('prediction');
 

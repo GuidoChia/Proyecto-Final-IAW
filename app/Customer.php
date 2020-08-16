@@ -46,8 +46,12 @@ class Customer extends Model
         $lastBuys = $this->buys()->orderBy('date', 'desc')->take($consideredBuysAmount)->get()->reverse();
         $firstDate = $lastBuys->first()->date; // The first buy within the last $consideredBuysAmount buys
         $lastDate = $lastBuys->last()->date; // The last buy from the customer
-        $meanBuyDifference = date_diff($lastDate, $firstDate)->format("%a")/$consideredBuysAmount;
-        return date_diff($lastDate, $predictedDate)->format("%r%a")>$meanBuyDifference;
+        $meanBuyDifference = date_diff($lastDate, $firstDate)->format("%a") / $consideredBuysAmount;
+        return date_diff($lastDate, $predictedDate)->format("%r%a") > $meanBuyDifference;
+    }
 
+    static public function findByName($name)
+    {
+        return Customer::where('name', '=', $name)->get();
     }
 }
