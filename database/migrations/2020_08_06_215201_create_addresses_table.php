@@ -19,6 +19,7 @@ class CreateAddressesTable extends Migration
             $table->float('lat');
             $table->float('lon');
             $table->string('description');
+            $table->foreignId('customer_id');
         });
     }
 

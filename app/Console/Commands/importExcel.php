@@ -76,7 +76,7 @@ class importExcel extends Command
 
                         $extension = pathinfo($file)['extension'];
                         if ($extension == 'xls' or $extension == 'xlsx') {
-                            echo $file.PHP_EOL;
+                            echo $file . PHP_EOL;
                             importExcel::importFile($rootFolderPath . "\\" . $folder . "\\" . $file);
                         }
                     }
@@ -92,6 +92,8 @@ class importExcel extends Command
         $inputFileType = IOFactory::identify($file);
 
         $customerName = basename($file, "." . strtolower($inputFileType));
+        $customerName = trim(mb_strtolower($customerName));
+        $customerName = $this->quitar_tildes($customerName);
         $customer = new Customer();
         $customer->name = $customerName;
         $customer->save();
@@ -107,8 +109,8 @@ class importExcel extends Command
             $dateValue = $dataArray[$i][0];
             if ($dateValue == 0) break;
             $date = $this->formatDate($dateValue);
-            if ($date<date_create_from_format('d/m/Y', '01/01/2015'))
-                $date=date_create_from_format('d/m/Y', '01/01/2015');
+            if ($date < date_create_from_format('d/m/Y', '01/01/2015'))
+                $date = date_create_from_format('d/m/Y', '01/01/2015');
 
             $twentyBought = $dataArray[$i][1];
             $twelveBought = $dataArray[$i][2];
@@ -177,5 +179,13 @@ class importExcel extends Command
 
         }
         return $date;
+    }
+
+    private function quitar_tildes($cadena)
+    {
+        $no_permitidas = array("á", "é", "í", "ó", "ú", "Á", "É", "Í", "Ó", "Ú", "ñ", "À", "Ã", "Ì", "Ò", "Ù", "Ã™", "Ã ", "Ã¨", "Ã¬", "Ã²", "Ã¹", "ç", "Ç", "Ã¢", "ê", "Ã®", "Ã´", "Ã»", "Ã‚", "ÃŠ", "ÃŽ", "Ã”", "Ã›", "ü", "Ã¶", "Ã–", "Ã¯", "Ã¤", "«", "Ò", "Ã", "Ã„", "Ã‹");
+        $permitidas = array("a", "e", "i", "o", "u", "A", "E", "I", "O", "U", "n", "N", "A", "E", "I", "O", "U", "a", "e", "i", "o", "u", "c", "C", "a", "e", "i", "o", "u", "A", "E", "I", "O", "U", "u", "o", "O", "i", "a", "e", "U", "I", "A", "E");
+        $texto = str_replace($no_permitidas, $permitidas, $cadena);
+        return $texto;
     }
 }

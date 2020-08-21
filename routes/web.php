@@ -22,5 +22,6 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::post('/prediction', 'RoutePredictionController@predictDate')->name('prediction-date');
 Route::get('/prediction', 'RoutePredictionController@index')->name('prediction');
 

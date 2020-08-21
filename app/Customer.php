@@ -25,6 +25,10 @@ class Customer extends Model
         'address_id',
     ];
 
+    public function getNameAttribute($value){
+        return ucwords($value);
+    }
+
     public function buys()
     {
         return $this->hasMany('App\Buy');
@@ -52,6 +56,6 @@ class Customer extends Model
 
     static public function findByName($name)
     {
-        return Customer::where('name', '=', $name)->get();
+        return Customer::where('name', '=', mb_strtolower($name))->get();
     }
 }

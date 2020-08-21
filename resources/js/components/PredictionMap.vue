@@ -5,13 +5,14 @@
 </template>
 
 <script>
-
     export default {
         name: "PredictionMap",
         data() {
             return {
                 map: {},
-                platform: {}
+                platform: {},
+                ui: {},
+                bubble: {}
             }
         },
         props: {
@@ -28,8 +29,10 @@
                 'apikey': this.apikey
             });
         },
+        /**
+         *  Creates de map and some related objects.
+         */
         mounted() {
-            console.log("points" + this.waypoints)
             let defaultLayers = this.platform.createDefaultLayers();
             this.map = new H.Map(
                 this.$refs.map,
@@ -41,23 +44,21 @@
             );
             let group = new H.map.Group();
             this.map.addObject(group);
-            /*let marker = new H.map.Marker({lng: this.center_lng, lat: this.center_lat});
-            group.addObject(marker);*/
             new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
-            H.ui.UI.createDefault(this.map, defaultLayers);
+            this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
             window.addEventListener('resize', () => map.getViewPort().resize());
             this.setRoute()
         },
         methods: {
             setRoute: function () {
-                var router = this.platform.getRoutingService(null, 8),
-                    routeRequestParams = {
-                        routingMode: 'fast',
-                        transportMode: 'car',
-                        origin: this.pointToString(this.origin),
-                        destination: this.pointToString(this.destination),
-                        return: 'polyline,turnByTurnActions,actions,instructions,travelSummary'
-                    };
+                const router = this.platform.getRoutingService(null, 7);
+                let routeRequestParams = {}
+                routeRequestParams.representation = 'display'
+                routeRequestParams.mode = 'fastest;car;traffic:disabled'
+                for (let i = 0; i < this.waypoints.length; i++) {
+                    let waypointName = 'waypoint' + i
+                    routeRequestParams[waypointName] = 'geo!' + this.pointToString(this.waypoints[i])
+                }
                 router.calculateRoute(
                     routeRequestParams,
                     this.onSuccess,
@@ -65,32 +66,51 @@
                 )
             },
             onSuccess: function (result) {
-                var route = result.routes[0];
+                let route = result.response.route[0]
                 this.addRouteShapeToMap(route);
                 this.addManueversToMap(route);
             },
             onError: function (error) {
-
+                console.error(error)
             },
             /**
              * Adds route lines from the given route response
              * @param route
              */
             addRouteShapeToMap: function (route) {
-                route.sections.forEach((section) => {
-                    let linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
+                let lineString = new H.geo.LineString(),
+                    routeShape = route.shape,
+                    polyline;
 
-                    let polyline = new H.map.Polyline(linestring, {
-                        style: {
-                            lineWidth: 4,
-                            strokeColor: 'rgba(0, 128, 255, 0.7)'
-                        }
-                    });
-                    this.map.addObject(polyline);
-                    this.map.getViewModel().setLookAtData({
-                        bounds: polyline.getBoundingBox()
-                    });
+                routeShape.forEach(function (point) {
+                    let parts = point.split(',');
+                    lineString.pushLatLngAlt(parts[0], parts[1]);
                 });
+
+                let routeOutline = new H.map.Polyline(lineString, {
+                    style: {
+                        lineWidth: 10,
+                        strokeColor: 'rgba(0, 128, 255, 0.7)',
+                        lineTailCap: 'arrow-tail',
+                        lineHeadCap: 'arrow-head'
+                    }
+                });
+
+                let routeArrows = new H.map.Polyline(lineString, {
+                        style: {
+                            lineWidth: 10,
+                            fillColor: 'white',
+                            strokeColor: 'rgba(255, 255, 255, 1)',
+                            lineDash: [0, 2],
+                            lineTailCap: 'arrow-tail',
+                            lineHeadCap: 'arrow-head'
+                        }
+                    }
+                );
+
+                let routeLine = new H.map.Group();
+                routeLine.addObjects([routeOutline, routeArrows]);
+                this.map.addObject(routeLine);
             },
             /**
              * Adds waypoint from the given route
@@ -106,26 +126,48 @@
                     group = new H.map.Group(),
                     i,
                     j;
-                route.sections.forEach((section) => {
-                    let poly = H.geo.LineString.fromFlexiblePolyline(section.polyline).getLatLngAltArray();
 
-                    let actions = section.actions;
-                    for (i = 0; i < actions.length; i += 1) {
-                        let action = actions[i];
+                for (i = 0; i < route.leg.length; i += 1) {
+                    for (j = 0; j < route.leg[i].maneuver.length; j += 1) {
+                        let maneuver = route.leg[i].maneuver[j];
                         var marker = new H.map.Marker({
-                                lat: poly[action.offset * 3],
-                                lng: poly[action.offset * 3 + 1]
+                                lat: maneuver.position.latitude,
+                                lng: maneuver.position.longitude
                             },
                             {icon: dotIcon});
-                        marker.instruction = action.instruction;
+                        marker.instruction = maneuver.instruction;
                         group.addObject(marker);
                     }
+                }
+                let vm = this
+                group.addEventListener('tap', function (evt) {
+                    vm.map.setCenter(evt.target.getGeometry());
+                    vm.openBubble(
+                        evt.target.getGeometry(), evt.target.instruction);
+                }, false);
 
-                    this.map.addObject(group);
-                });
+                this.map.addObject(group);
+            },
+            openBubble: function (position, text) {
+                if (this.isEmpty(this.bubble)) {
+                    this.bubble = new H.ui.InfoBubble(
+                        position,
+                        {content: text});
+                    this.ui.addBubble(this.bubble);
+                } else {
+                    this.bubble.setPosition(position);
+                    this.bubble.setContent(text);
+                    this.bubble.open();
+                }
             },
             pointToString: function (point) {
-                return point.lat+','+point.lng
+                return point.lat + ',' + point.lng
+            },
+            isEmpty: function (obj) {
+                if (obj == null) return true;
+                if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+                for (var key in obj) if (_.has(obj, key)) return false;
+                return true;
             }
         }
     }
