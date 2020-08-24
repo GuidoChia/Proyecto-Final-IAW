@@ -4,17 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Address;
 use App\Customer;
+use App\Services\RouteOptimizationService;
 use Illuminate\Http\Request;
 
 class RoutePredictionController extends Controller
 {
+    protected $optimizationService;
+
     /**
      * Create a new controller instance.
      *
-     * @return void
+     * @param RouteOptimizationService $optimizationService
      */
-    public function __construct()
+    public function __construct(RouteOptimizationService $service)
     {
+        $this->optimizationService = $service;
         $this->middleware('auth');
     }
 
@@ -31,33 +35,46 @@ class RoutePredictionController extends Controller
         foreach ($customers as $customer) {
             if ($customer->predictBuy(date_create_from_format('d/m/Y', $date))) {
                 $predictedCustomers->add($customer);
+
             }
         }
-        $predictedAddresses = $this->customersAddressesToJS($predictedCustomers);
-        $origin = $this->addressToJS(Customer::findByName('Municipalidad')->first()->address);
-        $destination = $this->addressToJS(Customer::findByName('Abuela Tita')->first()->address);
+        $origin = Customer::findByName('Municipalidad')->first()->address;
+        $destination = Customer::findByName('Municipalidad')->first()->address;
+        $predictedAddresses = $this->optimizationService->optimizeRoute($origin, $destination, $this->getAdresses($predictedCustomers));
+        $jsPredictedAdresses = $this->addressesToJS($predictedAddresses);
         return view('route_prediction_date')
-            ->withPredictedAddresses($predictedAddresses)
+            ->withPredictedAddresses($jsPredictedAdresses)
             ->withPredictedCustomers($predictedCustomers)
-            ->withOrigin($origin)
-            ->withDestination($destination);
+            ->withCenter($origin);
     }
 
-    private function customersAddressesToJS($customers)
+    private function getAdresses($customers)
     {
-        $res = '[';
+        $res = collect([]);
         foreach ($customers as $customer) {
             $address = $customer->address;
             if ($address != null) {
-                $res = $res . $this->addressToJS($address).',';
+                $res->add($address);
             }
+        }
+        return $res;
+    }
+
+    private function addressesToJS($addresses)
+    {
+        $res = '[';
+        foreach ($addresses as $address) {
+            $res = $res . $this->addressToJS($address) . ',';
         }
         $res = $res . ']';
         return $res;
     }
 
-    private function addressToJS(Address $address){
-        return '{lng:' . $address->lon . ', lat:' . $address->lat . '}';
+    private function addressToJS(Address $address)
+    {
+        return '{lng:' . $address->lon .
+            ', lat:' . $address->lat .
+            ', name:"'.$address->description.'"}';
     }
 
 }
