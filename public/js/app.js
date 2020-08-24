@@ -1951,10 +1951,7 @@ __webpack_require__.r(__webpack_exports__);
   name: "PredictionMap",
   data: function data() {
     return {
-      map: {},
-      platform: {},
-      ui: {},
-      bubble: {}
+      map: {}
     };
   },
   props: {
@@ -1962,153 +1959,31 @@ __webpack_require__.r(__webpack_exports__);
     width: String,
     height: String,
     center: Object,
-    origin: Object,
-    destination: Object,
     waypoints: Array
   },
-  created: function created() {
-    this.platform = new H.service.Platform({
-      'apikey': this.apikey
-    });
-  },
+  created: function created() {},
 
   /**
    *  Creates de map and some related objects.
    */
   mounted: function mounted() {
-    var defaultLayers = this.platform.createDefaultLayers();
-    this.map = new H.Map(this.$refs.map, defaultLayers.vector.normal.map, {
-      zoom: 16,
-      center: this.center
-    });
-    var group = new H.map.Group();
-    this.map.addObject(group);
-    new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
-    this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
-    window.addEventListener('resize', function () {
-      return map.getViewPort().resize();
-    });
+    this.map = L.map(this.$refs.map).setView(this.center, 15);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(this.map);
     this.setRoute();
   },
   methods: {
     setRoute: function setRoute() {
-      var router = this.platform.getRoutingService(null, 7);
-      var routeRequestParams = {};
-      routeRequestParams.representation = 'display';
-      routeRequestParams.mode = 'fastest;car;traffic:disabled';
-
-      for (var i = 0; i < this.waypoints.length; i++) {
-        var waypointName = 'waypoint' + i;
-        routeRequestParams[waypointName] = 'geo!' + this.pointToString(this.waypoints[i]);
-      }
-
-      router.calculateRoute(routeRequestParams, this.onSuccess, this.onError);
-    },
-    onSuccess: function onSuccess(result) {
-      var route = result.response.route[0];
-      this.addRouteShapeToMap(route);
-      this.addManueversToMap(route);
-    },
-    onError: function onError(error) {
-      console.error(error);
-    },
-
-    /**
-     * Adds route lines from the given route response
-     * @param route
-     */
-    addRouteShapeToMap: function addRouteShapeToMap(route) {
-      var lineString = new H.geo.LineString(),
-          routeShape = route.shape,
-          polyline;
-      routeShape.forEach(function (point) {
-        var parts = point.split(',');
-        lineString.pushLatLngAlt(parts[0], parts[1]);
-      });
-      var routeOutline = new H.map.Polyline(lineString, {
-        style: {
-          lineWidth: 10,
-          strokeColor: 'rgba(0, 128, 255, 0.7)',
-          lineTailCap: 'arrow-tail',
-          lineHeadCap: 'arrow-head'
+      var control = L.Routing.control({
+        waypoints: this.waypoints,
+        collapsible: true,
+        createMarker: function createMarker(i, waypoint, n) {
+          return L.marker(waypoint.latLng);
         }
       });
-      var routeArrows = new H.map.Polyline(lineString, {
-        style: {
-          lineWidth: 10,
-          fillColor: 'white',
-          strokeColor: 'rgba(255, 255, 255, 1)',
-          lineDash: [0, 2],
-          lineTailCap: 'arrow-tail',
-          lineHeadCap: 'arrow-head'
-        }
-      });
-      var routeLine = new H.map.Group();
-      routeLine.addObjects([routeOutline, routeArrows]);
-      this.map.addObject(routeLine);
-    },
-
-    /**
-     * Adds waypoint from the given route
-     * @param route
-     */
-    addManueversToMap: function addManueversToMap(route) {
-      var svgMarkup = '<svg width="18" height="18" ' + 'xmlns="http://www.w3.org/2000/svg">' + '<circle cx="8" cy="8" r="8" ' + 'fill="#1b468d" stroke="white" stroke-width="1"  />' + '</svg>',
-          dotIcon = new H.map.Icon(svgMarkup, {
-        anchor: {
-          x: 8,
-          y: 8
-        }
-      }),
-          group = new H.map.Group(),
-          i,
-          j;
-
-      for (i = 0; i < route.leg.length; i += 1) {
-        for (j = 0; j < route.leg[i].maneuver.length; j += 1) {
-          var maneuver = route.leg[i].maneuver[j];
-          var marker = new H.map.Marker({
-            lat: maneuver.position.latitude,
-            lng: maneuver.position.longitude
-          }, {
-            icon: dotIcon
-          });
-          marker.instruction = maneuver.instruction;
-          group.addObject(marker);
-        }
-      }
-
-      var vm = this;
-      group.addEventListener('tap', function (evt) {
-        vm.map.setCenter(evt.target.getGeometry());
-        vm.openBubble(evt.target.getGeometry(), evt.target.instruction);
-      }, false);
-      this.map.addObject(group);
-    },
-    openBubble: function openBubble(position, text) {
-      if (this.isEmpty(this.bubble)) {
-        this.bubble = new H.ui.InfoBubble(position, {
-          content: text
-        });
-        this.ui.addBubble(this.bubble);
-      } else {
-        this.bubble.setPosition(position);
-        this.bubble.setContent(text);
-        this.bubble.open();
-      }
-    },
-    pointToString: function pointToString(point) {
-      return point.lat + ',' + point.lng;
-    },
-    isEmpty: function isEmpty(obj) {
-      if (obj == null) return true;
-      if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
-
-      for (var key in obj) {
-        if (_.has(obj, key)) return false;
-      }
-
-      return true;
+      control.addTo(this.map);
+      control.hide();
     }
   }
 });
