@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Address;
 use App\Customer;
+use App\Section;
 use Illuminate\Console\Command;
 
 class SetupAddresses extends Command
@@ -42,6 +43,7 @@ class SetupAddresses extends Command
         if ($this->option('fresh')){
             Address::query()->delete();
         }
+
         $names = ['Municipalidad',
             'Abuela Tita',
             'Alvarez Carlos',
