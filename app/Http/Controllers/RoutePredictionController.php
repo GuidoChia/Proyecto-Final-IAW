@@ -35,7 +35,6 @@ class RoutePredictionController extends Controller
         foreach ($customers as $customer) {
             if ($customer->predictBuy(date_create_from_format('d/m/Y', $date))) {
                 $predictedCustomers->add($customer);
-
             }
         }
         $origin = Customer::findByName('Municipalidad')->first()->address;
@@ -55,6 +54,7 @@ class RoutePredictionController extends Controller
             $address = $customer->address;
             if ($address != null) {
                 $res->add($address);
+                dd($address);
             }
         }
         return $res;

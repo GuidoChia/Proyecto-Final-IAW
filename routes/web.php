@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/',
-    function () {
-        return view('welcome');
-    });
+Route::get('/', 'WelcomeController@index');
 
 Auth::routes();
 
@@ -25,3 +22,23 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::post('/prediction', 'RoutePredictionController@predictDate')->name('prediction-date');
 Route::get('/prediction', 'RoutePredictionController@index')->name('prediction');
 
+Route::post('/add-address', 'AddAddressController@index')->name('add-address');
+Route::get('/add-address', 'AddAddressController@index')->name('add-address');
+
+Route::post('/add-buy', 'AddBuyController@index')->name('add-buy');
+Route::get('/add-buy', 'AddBuyController@index')->name('add-buy');
+
+Route::post('/add-customer', 'AddCustomerController@index')->name('add-customer');
+Route::get('/add-customer', 'AddCustomerController@index')->name('add-customer');
+
+Route::post('/remove-address', 'RemoveAddressController@index')->name('remove-address');
+Route::get('/remove-address', 'RemoveAddressController@index')->name('remove-address');
+
+Route::post('/remove-buy', 'RemoveBuyController@index')->name('remove-buy');
+Route::get('/remove-buy', 'RemoveBuyController@index')->name('remove-buy');
+
+Route::post('/remove-customer', 'RemoveCustomerController@index')->name('remove-customer');
+Route::get('/remove-customer', 'RemoveCustomerController@index')->name('remove-customer');
+
+Route::post('/search-customer', 'SearchCustomerController@index')->name('search-customer');
+Route::get('/search-customer', 'SearchCustomerController@index')->name('search-customer');
