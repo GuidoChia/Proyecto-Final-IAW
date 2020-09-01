@@ -15,6 +15,11 @@ class Address extends Model
         'lat', 'lon', 'description'
     ];
 
+    /**
+     * Checks whether the address is inside the given section
+     * @param Section $section
+     * @return bool true if $this is inside $section, false otherwise
+     */
     public function isInSection(Section $section)
     {
         $lat = $this->lat;
@@ -28,7 +33,7 @@ class Address extends Model
         ];
         $vertices_amount = count($vertices);
 
-        $c = 0;
+        $c = false;
         for ($i = 0, $j = $vertices_amount; $i < $vertices_amount; $j = $i++) {
             if ((($vertices[$i]['lat'] > $lat != ($vertices[$j]['lat'] > $lat)) &&
                 ($lon < ($vertices[$j]['lon'] - $vertices[$i]['lon']) * ($lat - $vertices[$i]['lat']) / ($vertices[$j]['lat'] - $vertices[$i]['lat']) + $vertices[$i]['lon'])))

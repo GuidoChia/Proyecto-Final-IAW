@@ -26,6 +26,11 @@ class Customer extends Model
         'address_id',
     ];
 
+    /**
+     * Mutates the name, upper casing the first letters.
+     * @param $value
+     * @return string
+     */
     public function getNameAttribute($value){
         return ucwords($value);
     }

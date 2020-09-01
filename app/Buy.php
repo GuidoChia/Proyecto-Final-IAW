@@ -25,21 +25,37 @@ class Buy extends Model
         'created' => BuyCreated::class,
     ];
 
+    /**
+     * Returns the associated customer
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function customer()
     {
         return $this->belongsTo('App\Customer');
     }
 
+    /**
+     * Returns the associated TwelveBuy
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function twelveBuy()
     {
         return $this->hasOne('App\TwelveBuy');
     }
 
+    /**
+     * Returns the associated TwentyBuy
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function twentyBuy()
     {
         return $this->hasOne('App\TwentyBuy');
     }
 
+    /**
+     * Returns the associated ExtraBuy
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
     public function extraBuy()
     {
         return $this->hasOne('App\ExtraBuy');

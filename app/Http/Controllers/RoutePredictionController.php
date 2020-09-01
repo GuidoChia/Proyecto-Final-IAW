@@ -22,11 +22,21 @@ class RoutePredictionController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * Creates the route prediction view
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function index()
     {
         return view('route_prediction');
     }
 
+    /**
+     * Predicts the customers that could buy in the given date, gets the addresses,
+     * and redirects to a view showing the results.
+     * @param Request $request
+     * @return mixed result view
+     */
     public function predictDate(Request $request)
     {
         $date = $request->input('date');

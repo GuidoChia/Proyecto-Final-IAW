@@ -17,6 +17,10 @@ class Section extends Model
         'lon_top_right'
     ];
 
+    /**
+     * Calculates all the addresses inside the section
+     * @return \Illuminate\Support\Collection
+     */
     public function getAddresses()
     {
         $res = collect([]);
