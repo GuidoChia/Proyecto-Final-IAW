@@ -9,8 +9,10 @@ use App\TwelveBuy;
 use App\TwentyBuy;
 use Illuminate\Console\Command;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\IReadFilter;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
-class ReadFilter implements \PhpOffice\PhpSpreadsheet\Reader\IReadFilter
+class ReadFilter implements IReadFilter
 {
     private $startRow = 4;
     private $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
@@ -173,7 +175,7 @@ class importExcel extends Command
     {
         $date = null;
         if (is_int($dateValue)) {
-            $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dateValue);
+            $date = Date::excelToDateTimeObject($dateValue);
         } else if (is_string($dateValue)) {
             $date = date_create_from_format('d/m/Y', trim($dateValue));
 

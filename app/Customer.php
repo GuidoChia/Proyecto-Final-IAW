@@ -2,8 +2,9 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 
 class Customer extends Model
 {
@@ -31,7 +32,8 @@ class Customer extends Model
      * @param $value
      * @return string
      */
-    public function getNameAttribute($value){
+    public function getNameAttribute($value)
+    {
         return ucwords($value);
     }
 
@@ -43,6 +45,11 @@ class Customer extends Model
     public function address()
     {
         return $this->hasOne('App\Address');
+    }
+
+    public function section()
+    {
+        return $this->hasOneThrough('App\Section', 'App\Address', 'id', 'id', 'address_id', 'section_id');
     }
 
     /**
@@ -63,5 +70,24 @@ class Customer extends Model
     static public function findByName($name)
     {
         return Customer::where('name', '=', mb_strtolower($name))->get();
+    }
+
+    static public function findBySection($sectionName): Collection
+    {
+        if ($sectionName == "All") {
+            return Customer::all();
+        } else {
+            return Customer::whereHas('section', function (Builder $query) use ($sectionName) {
+                $query->where('name', '=', $sectionName);
+            })->get();
+        }
+    }
+
+    static public function getCustomerNamesAsArray()
+    {
+        return array_values(
+            Customer::all()->map(function ($item, $key) {
+            return $item->name;
+        })->sort()->toArray());
     }
 }

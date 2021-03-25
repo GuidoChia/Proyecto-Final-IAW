@@ -3,7 +3,6 @@
 @section('content')
     <div class="container">
         <prediction-map
-                apikey="{{env('OPEN_ROUTE_API_KEY')}}"
                 v-bind:center="{{$center}}"
                 width="100%"
                 height="835px"

@@ -40,7 +40,7 @@ class SetupAddresses extends Command
      */
     public function handle()
     {
-        if ($this->option('fresh')){
+        if ($this->option('fresh')) {
             Address::query()->delete();
         }
 
@@ -56,7 +56,7 @@ class SetupAddresses extends Command
             'Barth Mario',
             'Bauer Manuel',
             'Bauer Pique'
-            ];
+        ];
 
         $latitudes = [-37.3772748,
             -37.37499749822193,
@@ -83,15 +83,29 @@ class SetupAddresses extends Command
             -63.77866467117019,
             -63.7793921359206];
 
-        for ($i=0; $i<count($names); $i++){
+        $section1 = new Section();
+        $section1->name = "S1";
+        $section1->save();
+
+        $section2 = new Section();
+        $section2->name = "S2";
+        $section2->save();
+
+
+        for ($i = 0; $i < count($names); $i++) {
             $customer = Customer::findByName($names[$i])->first();
             $address = new Address;
-            $address->lat=$latitudes[$i];
-            $address->lon=$longitudes[$i];
-            $address->description=$customer->name." address.";
+            $address->lat = $latitudes[$i];
+            $address->lon = $longitudes[$i];
+            $address->description = $customer->name . " address.";
             $address->customer_id = $customer->id;
+            if ($i % 2 == 0) {
+                $address->section_id = $section1->id;
+            } else {
+                $address->section_id = $section2->id;
+            }
             $address->save();
-            $customer->address_id=$address->id;
+            $customer->address_id = $address->id;
             $customer->save();
         }
 

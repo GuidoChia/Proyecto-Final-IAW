@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Address;
 use App\Customer;
+use App\Section;
 use App\Services\RouteOptimizationService;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+
 
 class RoutePredictionController extends Controller
 {
@@ -14,7 +18,7 @@ class RoutePredictionController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @param RouteOptimizationService $optimizationService
+     * @param RouteOptimizationService $service
      */
     public function __construct(RouteOptimizationService $service)
     {
@@ -24,11 +28,12 @@ class RoutePredictionController extends Controller
 
     /**
      * Creates the route prediction view
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return View
      */
     public function index()
     {
-        return view('route_prediction');
+        $sections = Section::all();
+        return view('route_prediction')->withSections($sections);
     }
 
     /**
@@ -40,15 +45,16 @@ class RoutePredictionController extends Controller
     public function predictDate(Request $request)
     {
         $date = $request->input('date');
-        $customers = Customer::all();
-        $predictedCustomers = collect([]);
-        foreach ($customers as $customer) {
-            if ($customer->predictBuy(date_create_from_format('d/m/Y', $date))) {
-                $predictedCustomers->add($customer);
-            }
-        }
+        $sectionName = $request->input('section');
+        $customers = Customer::findBySection($sectionName);
+
+        $predictedCustomers = $customers->filter(function ($value, $key) use ($date) {
+            return $value->predictBuy(date_create_from_format('d/m/Y', $date));
+        });
+
         $origin = Customer::findByName('Municipalidad')->first()->address;
         $destination = Customer::findByName('Municipalidad')->first()->address;
+
         $predictedAddresses = $this->optimizationService->optimizeRoute($origin, $destination, $this->getAdresses($predictedCustomers));
         $jsPredictedAdresses = $this->addressesToJS($predictedAddresses);
         return view('route_prediction_date')
@@ -57,17 +63,14 @@ class RoutePredictionController extends Controller
             ->withCenter($origin);
     }
 
-    private function getAdresses($customers)
+    private function getAdresses(Collection $customers)
     {
-        $res = collect([]);
-        foreach ($customers as $customer) {
-            $address = $customer->address;
-            if ($address != null) {
-                $res->add($address);
-                dd($address);
-            }
-        }
-        return $res;
+        return $customers->filter(function ($value, $key){
+            return $value->address!=null;
+        })->map(function ($value, $key){
+            return $value->address;
+        });
+
     }
 
     private function addressesToJS($addresses)
@@ -84,7 +87,7 @@ class RoutePredictionController extends Controller
     {
         return '{lng:' . $address->lon .
             ', lat:' . $address->lat .
-            ', name:"'.$address->description.'"}';
+            ', name:"' . $address->description . '"}';
     }
 
 }

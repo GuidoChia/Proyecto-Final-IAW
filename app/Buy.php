@@ -4,6 +4,8 @@ namespace App;
 
 use App\Events\BuyCreated;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Buy extends Model
 {
@@ -27,7 +29,7 @@ class Buy extends Model
 
     /**
      * Returns the associated customer
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function customer()
     {
@@ -36,7 +38,7 @@ class Buy extends Model
 
     /**
      * Returns the associated TwelveBuy
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function twelveBuy()
     {
@@ -45,7 +47,7 @@ class Buy extends Model
 
     /**
      * Returns the associated TwentyBuy
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function twentyBuy()
     {
@@ -54,7 +56,7 @@ class Buy extends Model
 
     /**
      * Returns the associated ExtraBuy
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * @return HasOne
      */
     public function extraBuy()
     {

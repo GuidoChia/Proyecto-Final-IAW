@@ -16,10 +16,7 @@ class CreateSectionsTable extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->float('lat_bottom_left');
-            $table->float('lon_bottom_left');
-            $table->float('lat_top_right');
-            $table->float('lon_top_right');
+            $table->string('name');
         });
     }
 

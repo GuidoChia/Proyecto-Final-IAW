@@ -20,6 +20,7 @@ class CreateAddressesTable extends Migration
             $table->float('lon');
             $table->string('description');
             $table->foreignId('customer_id');
+            $table->foreignId('section_id');
         });
     }
 

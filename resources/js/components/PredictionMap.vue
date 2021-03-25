@@ -13,7 +13,6 @@
             }
         },
         props: {
-            apikey: String,
             width: String,
             height: String,
             center: Object,
@@ -32,13 +31,6 @@
                 attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(this.map);
 
-            let bounds = [
-                [-37.375829324781456,-63.7816858291626],
-                [-37.370848523540914, -63.77490520477295],
-                [-37.37361601426734,-63.77155780792236],
-                [-37.3792119854451,-63.77717971801758]
-            ]
-            L.polygon(bounds, {color: "#ff7800", weight: 1}).addTo(this.map);
             this.setRoute()
         },
         methods: {
@@ -53,7 +45,6 @@
                 control.addTo(this.map)
                 control.hide()
             }
-
         }
     }
 </script>
